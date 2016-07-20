@@ -14,12 +14,26 @@
 <meta name='viewport' content='width=device-width, initial-scale=1'>
 </head>
 <body>
+    <div id="button-group" class="col-md-6">
+        <button type="button" id="start" class="btn btn-primary">start</button>
+        <button type="button" id="stop" class="btn btn-danger">stop</button>
+        <button type="button" id="pause" class="btn btn-warning">pause</button>
+        <button type="button" id="resume" class="btn btn-success">resume</button>
+    </div>
+    <div id="score"  class="col-md-6">
+    </div>
 <script type="text/javascript">
 var company_names = ["Agung Podomoro Group","Citibank","Nokia Solution and Networks PT","Bhinneka.com","Tripatra","RCTI","TelkomSigma","Intrias Mandiri Sejati PT","Altermyth","Panin Bank","Gramedia Bookstore","Garuda Indonesia","Chevron Pacific","Darmex Agro","Bank SBI Indonesia PT","DBS Bank","UPS Cardig International PT","Tately NV","Cigna","Antam"];
 
 $(document).ready(function() {
-	var typer = new Typer();
-	typer.start();
+	var button = new ButtonView({
+        model: new Typer()
+    });
+
+    var scoreView = new ScoreView();
+
+
+
 });
 </script>
 </body>
