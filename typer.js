@@ -53,98 +53,6 @@ var WordView = Backbone.View.extend({
 	}
 });
 
-	var TyperView = Backbone.View.extend({
-
-	events: {
-		'keyup input': 'check'
-	},
-
-	initialize: function() {
-		var wrapper = $('<div>')
-			.css({
-				position:'fixed',
-				top:'0',
-				left:'0',
-				width:'100%',
-				height:'100%'
-			});
-		this.wrapper = wrapper;
-
-		var self = this;
-		this.text_input = $('<input>')
-			.addClass('form-control')
-			.css({
-				'border-radius':'4px',
-				position:'absolute',
-				bottom:'0',
-				'min-width':'80%',
-				width:'80%',
-				'margin-bottom':'10px',
-				'z-index':'1000'
-			});
-
-		$(this.el)
-			.append(wrapper
-				.append($('<form>')
-					.attr({
-						role:'form'
-					})
-					.submit(function() {
-						return false;
-					})
-					.append(this.text_input)));
-
-		this.text_input.css({left:((wrapper.width() - this.text_input.width()) / 2) + 'px'});
-		this.text_input.focus();
-
-		this.listenTo(this.model, 'change', this.render);
-	},
-
-	render: function() {
-		var model = this.model;
-		var words = model.get('words');
-
-		for(var i = 0;i < words.length;i++) {
-			var word = words.at(i);
-			if(!word.get('view')) {
-				var word_view_wrapper = $('<div>');
-				word_view_wrapper.css({
-					'max-width':'50%',
-					'min-width':'800px'
-				});
-				this.wrapper.append(word_view_wrapper);
-				word.set({
-					view:new WordView({
-						model: word,
-						el: word_view_wrapper
-					})
-				});
-			} else {
-				word.get('view').render();
-			}
-		}
-	},
-
-	check: function() {
-		var words = this.model.get('words');
-		var self = this;
-		words.each(function(word) {
-			var typed_string = $(self.text_input).val();
-			var string = word.get('string');
-
-			if(string.toLowerCase().indexOf(typed_string.toLowerCase()) == 0) {
-				word.set({highlight:typed_string.length});
-				if(typed_string.length == string.length) {
-					$(self.text_input).val('');
-				}
-			} else {
-				word.set({highlight:0});
-			}
-		});
-	}
-
-});
-
 var ButtonView = Backbone.View.extend({
 	el: '#button-group',
 
@@ -202,8 +110,8 @@ var ScoreView = Backbone.View.extend({
 
 	el: '#score',
 
-	initialize: function() {
-		this.timer = 0;
+	initialize: function(options) {
+		this.timer = options.score;
 		this.render();
 	},
 
@@ -224,13 +132,7 @@ var Typer = Backbone.Model.extend({
 	},
 
 	initialize: function() {
-		new TyperView({
-			model: this,
-			el: $(document.body)
-		});
-		new ScoreView({
-			model: this
-		});
+
 	},
 
 	start: function() {
@@ -251,19 +153,21 @@ var Typer = Backbone.Model.extend({
 
 		if(words.length < this.get('max_num_words')) {
 			var top_most_word = undefined;
-			for(var i = 0;i < words.length;i++) {
-				var word = words.at(i);
+
+			words.each(function(word) {
 				if(!top_most_word) {
 					top_most_word = word;
 				} else if(word.get('y') < top_most_word.get('y')) {
 					top_most_word = word;
 				}
-			}
+			});
+
 			//create new word
 			if(!top_most_word || top_most_word.get('y') > this.get('min_distance_between_words')) {
 				var random_company_name_index = this.random_number_from_interval(0,company_names.length - 1);
 				var string = company_names[random_company_name_index];
 				var filtered_string = '';
+
 				for(var j = 0;j < string.length;j++) {
 					if(/^[a-zA-Z()]+$/.test(string.charAt(j))) {
 						filtered_string += string.charAt(j);
@@ -280,24 +184,18 @@ var Typer = Backbone.Model.extend({
 			}
 		}
 
-		var words_to_be_removed = [];
 		//move the words
-		for(var i = 0;i < words.length;i++) {
-			var word = words.at(i);
-			word.move();
-
+		words.each(function(word) {
 			if(word.get('y') > $(window).height() || word.get('move_next_iteration')) {
-				words_to_be_removed.push(word);
+				words.remove(word);
 			}
 
 			if(word.get('highlight') && word.get('string').length == word.get('highlight')) {
 				word.set({move_next_iteration:true});
 			}
-		}
 
-		for(var i = 0;i < words_to_be_removed.length;i++) {
-			words.remove(words_to_be_removed[i]);
-		}
+			word.move();
+		});
 
 		this.trigger('change');
 	},
@@ -305,4 +203,106 @@ var Typer = Backbone.Model.extend({
 	random_number_from_interval: function(min,max) {
 	    return Math.floor(Math.random()*(max-min+1)+min);
 	}
+});
+
+var TyperView = Backbone.View.extend({
+
+	events: {
+		'keyup input': 'check'
+	},
+
+	initialize: function() {
+
+		this.buttonView = new ButtonView({
+			model: this.model
+		});
+
+		this.scoreView = new ScoreView({
+			score: 100
+		});
+
+		this.wrapper = $('<div>')
+			.css({
+				position:'fixed',
+				top:'0',
+				left:'0',
+				width:'100%',
+				height:'100%'
+			});
+
+		this.text_input = $('<input>').addClass('form-control')
+									  .css({
+											'border-radius':'4px',
+											position:'absolute',
+											bottom:'0',
+											'min-width':'80%',
+											width:'80%',
+											'margin-bottom':'10px',
+											'z-index':'1000'
+									   });
+
+		$(this.el).append(
+			this.wrapper.append(
+				$('<form>').attr({
+					role:'form'
+				})
+				.submit(function() {
+					return false;
+				})
+				.append(this.text_input)
+			)
+		);
+
+		this.text_input.css({left:((this.wrapper.width() - this.text_input.width()) / 2) + 'px'});
+		this.text_input.focus();
+
+		this.listenTo(this.model, 'change', this.render);
+	},
+
+	render: function() {
+		var model = this.model;
+		var words = model.get('words');
+		var self = this;
+
+		words.each(function(word) {
+			if(!word.get('view')) {
+				var word_view_wrapper = $('<div>');
+				word_view_wrapper.css({
+					'max-width':'50%',
+					'min-width':'800px'
+				});
+				self.wrapper.append(word_view_wrapper);
+				word.set({
+					view:new WordView({
+						model: word,
+						el: word_view_wrapper
+					})
+				});
+			} else {
+				word.get('view').render();
+			}
+		});
+
+	},
+
+	check: function() {
+		var words = this.model.get('words');
+		var self = this;
+		words.each(function(word) {
+			var typed_string = $(self.text_input).val();
+			var string = word.get('string');
+			var sama = string.toLowerCase().indexOf(typed_string.toLowerCase());
+			if( sama == 0) {
+				word.set({highlight:typed_string.length});
+				if(typed_string.length == string.length) {
+					$(self.text_input).val('');
+				}
+			} else if(sama != 0 && word.get('highlight')) {
+				word.set({highlight:0});
+				self.scoreView.timer -= 1;
+				self.scoreView.render();
+			}
+		});
+	}
+
 });
