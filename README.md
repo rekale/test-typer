@@ -15,15 +15,16 @@ Pertanyaan:
 
 jawaban:
 
-1. Library Bootstrap, website: http://getbootstrap.com dokumentasi: http://getbootstrap.com/getting-started/
-    Jquery, website: https://jquery.com/ dokumentasi: http://api.jquery.com/
-    Jquery ui, website: https://jqueryui.com dokumentasi: http://api.jqueryui.com/
-    Underscore.js, website: http://underscorejs.org/ dokumentasi: http://underscorejs.org/
-    Backbone.js, website: http://backbonejs.org/ dokumentasi: http://backbonejs.org/
+1. 
+   * Library Bootstrap, website: http://getbootstrap.com dokumentasi: http://getbootstrap.com/getting-started/
+   * Jquery, website: https://jquery.com/ dokumentasi: http://api.jquery.com/
+   * Jquery ui, website: https://jqueryui.com dokumentasi: http://api.jqueryui.com/
+   * Underscore.js, website: http://underscorejs.org/ dokumentasi: http://underscorejs.org/
+   * Backbone.js, website: http://backbonejs.org/ dokumentasi: http://backbonejs.org/
 
-2.	Aplikasi tersebut laggy animation_delay terlalu lambat, cara membuatnya agar smooth adapalah dengan mempercepat animation_delay.
+2. Aplikasi tersebut laggy animation_delay terlalu lambat, cara membuatnya agar smooth adapalah dengan mempercepat animation_delay.
 
-3.	Aplikasi tersebut tidak jalan di IE7, karena IE7 menganggap error extra koma yang berada di array defaults milik objek Typer, jadi karakter yang dihapus adalah karakter koma dalam array yang berada pada baris 141
+3. Aplikasi tersebut tidak jalan di IE7, karena IE7 menganggap error extra koma yang berada di array defaults milik objek Typer, jadi karakter yang dihapus adalah karakter koma dalam array yang berada pada baris 141
 
 
 untuk jawaban no 4- 7 sudah saya implementasikan di kodingan ini, silahkan di cek.
